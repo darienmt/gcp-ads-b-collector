@@ -1,0 +1,98 @@
+[
+  {
+    "description": "now: the time this file was generated, in seconds since Jan 1 1970 00:00:00 GMT (the Unix epoch)",
+    "mode": "REQUIRED",
+    "name": "timestamp",
+    "type": "TIMESTAMP"
+  },
+  {
+    "description": "aircraft.hex: the 24-bit ICAO identifier of the aircraft, as 6 hex digits. The identifier may start with '~', this means that the address is a non-ICAO address (e.g. from TIS-B).",
+    "mode": "REQUIRED",
+    "name": "hex",
+    "type": "STRING"
+  },
+  {
+    "description": "aircraft.squawk: the 4-digit squawk (octal representation)",
+    "mode": "NULLABLE",
+    "name": "squawk",
+    "type": "STRING"
+  },
+  {
+    "description": "aircraft.flight: the flight name / callsign",
+    "mode": "NULLABLE",
+    "name": "flight",
+    "type": "STRING"
+  },
+  {
+    "description": "aircraft.lat: aircraft latitude in decimal degrees",
+    "mode": "NULLABLE",
+    "name": "lat",
+    "type": "NUMERIC"
+  },
+  {
+    "description": "aircraft.lon: aircraft longitude in decimal degrees",
+    "mode": "NULLABLE",
+    "name": "lon",
+    "type": "NUMERIC"
+  },
+  {
+    "description": "aircraft.nucp: the NUCp (navigational uncertainty category) reported for the position",
+    "mode": "NULLABLE",
+    "name": "nucp",
+    "type": "INTEGER"
+  },
+  {
+    "description": "aircraft.seen_pos: how long ago (in seconds before now) the position was last updated",
+    "mode": "NULLABLE",
+    "name": "seen_pos",
+    "type": "NUMERIC"
+  },
+  {
+    "description": "aircraft.altitude: the aircraft altitude in feet, or ground if it is reporting it is on the ground",
+    "mode": "NULLABLE",
+    "name": "altitude",
+    "type": "INTEGER"
+  },
+  {
+    "description": "aircraft.vert_rate: vertical rate in feet/minute",
+    "mode": "NULLABLE",
+    "name": "vert_rate",
+    "type": "INTEGER"
+  },
+  {
+    "description": "aircraft.track: true track over ground in degrees (0-359)",
+    "mode": "NULLABLE",
+    "name": "track",
+    "type": "INTEGER"
+  },
+  {
+    "description": "aircraft.speed: reported speed in kt. This is usually speed over ground, but might be IAS - you can't tell the difference here, sorry!",
+    "mode": "NULLABLE",
+    "name": "speed",
+    "type": "INTEGER"
+  },
+  {
+    "description": "aircraft.messages: total number of Mode S messages received from this aircraft",
+    "mode": "NULLABLE",
+    "name": "messages",
+    "type": "INTEGER"
+  },
+  {
+    "description": "aircraft.seen: how long ago (in seconds before now) a message was last received from this aircraft",
+    "mode": "NULLABLE",
+    "name": "seen",
+    "type": "NUMERIC"
+  },
+  {
+    "description": "aircraft.rssi: recent average RSSI (signal power), in dbFS; this will always be negative.",
+    "mode": "NULLABLE",
+    "name": "rssi",
+    "type": "NUMERIC"
+  },
+  {
+    "description": "Time stamp when this record was inserted on the table",
+    "mode": "REQUIRED",
+    "name": "created_at",
+    "type": "DATETIME"
+  }
+]
