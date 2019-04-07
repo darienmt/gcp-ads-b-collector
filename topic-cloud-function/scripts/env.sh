@@ -8,9 +8,13 @@ CURRENT_ACCOUNT=${CURRENT_ACCOUNT/@/_}
 
 export CURRENT_ACCOUNT=${CURRENT_ACCOUNT//./_}
 
+export TEST_RUNNER_ACCOUNT=test-runner
+
+export GOOGLE_APPLICATION_CREDENTIALS=~/GCP_${PROJECT_ID}_${TEST_RUNNER_ACCOUNT}.json
+
 export INPUT_TOPIC=adbs
 
-export DATASET_ID=airplane_data
+export DATASET_ID=aircraft_data
 
 export TABLE_ID=adbs_messages
 

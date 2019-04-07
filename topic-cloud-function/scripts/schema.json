@@ -1,5 +1,11 @@
 [
   {
+    "description": "device_id: Unique identifier for the device sending this data",
+    "mode": "REQUIRED",
+    "name": "device_id",
+    "type": "STRING"
+  },
+  {
     "description": "now: the time this file was generated, in seconds since Jan 1 1970 00:00:00 GMT (the Unix epoch)",
     "mode": "REQUIRED",
     "name": "timestamp",
