@@ -13,6 +13,8 @@ from main import create_records
 
 from main import insert_records
 
+from main import handler
+
 class TestMain(object):
 
   @classmethod
@@ -102,7 +104,7 @@ class TestMain(object):
     assert len(unique_ids) == 4
     assert len(records) == 4
 
-  def test_create_records_ok(self):
+  def test_insert_records_ok(self):
     data = {
       'device_id' : 'this_device',
       'aircraft_data' : [
@@ -135,7 +137,7 @@ class TestMain(object):
     assert total_inserted == 4
     assert not errors
 
-  def test_create_records_with_errors(self):
+  def test_insert_records_with_errors(self):
     data = {
       'device_id' : 'this_device',
       'aircraft_data' : [
@@ -153,3 +155,21 @@ class TestMain(object):
     total_inserted, errors = insert_records(data, TestMain.table, TestMain.bq_client)
     assert total_inserted == 0
     assert len(errors) == 1
+
+  # def test_handler_ok(self):
+  #   event = { 
+  #     'data' : "ewogICAgICAiZGV2aWNlX2lkIiA6ICJ0aGlzX2RldmljZSIsCiAgICAgICJhaXJjcmFmdF9kYXRhIiA6IFsKICAgICAgICB7CiAgICAgICAgICAibm93IiA6IDE1NTQzNDcwNjUuOSwKICAgICAgICAgICJhaXJjcmFmdCIgOiBbCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAiaGV4IjogImNjY2MiLCAic3F1YXdrIjogIjQzMDQiLCAibGF0IjogNDMuNTE3MzExLCAibG9uIjogLTc5LjgyMTQ5NCwgIm51Y3AiOiAwLCAic2Vlbl9wb3MiOiA2LjcsICJhbHRpdHVkZSI6IDIzMDAsICJ2ZXJ0X3JhdGUiOiAwLCAidHJhY2siOiAxNDQsICJzcGVlZCI6IDE3NiwgIm1lc3NhZ2VzIjogNzAsICJzZWVuIjogMC44LCAicnNzaSI6IC0yMy4yCiAgICAgICAgICAgIH0KICAgICAgICAgIF0KICAgICAgICB9CiAgICAgIF0KICAgIH0="
+  #   }
+
+  #   context = {}
+
+  #   handler(event, context)
+
+  # def test_handler_with_errors(self):
+  #   event = { 
+  #     'data' : "ewogICAgICAiZGV2aWNlX2lkIiA6ICJ0aGlzX2RldmljZSIsCiAgICAgICJhaXJjcmFmdF9kYXRhIiA6IFsKICAgICAgICB7CiAgICAgICAgICAibm93IiA6IDE1NTQzNDcwNjUuOSwKICAgICAgICAgICJhaXJjcmFmdCIgOiBbCiAgICAgICAgICAgeyJtbGF0IjpbXSwidGlzYiI6W10sIm1lc3NhZ2VzIjoyMTIwLCJzZWVuIjoxOTMuOSwicnNzaSI6LTI5LjR9CiAgICAgICAgICBdCiAgICAgICAgfQogICAgICBdCiAgICB9"
+  #   }
+
+  #   context = {}
+
+  #   handler(event, context)

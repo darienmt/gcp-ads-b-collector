@@ -6,7 +6,7 @@ bq mk --description "Airplane data dataset" ${PROJECT_ID}:${DATASET_ID}
 
 bq update --set_label created-by:${CURRENT_ACCOUNT} ${PROJECT_ID}:${DATASET_ID}
 
-bq mk --table --description "ADB-S Messages" \
+bq mk --table --description "Aircraft.json data" \
   --label "created-by:${CURRENT_ACCOUNT}" \
   --schema ./scripts/schema.json \
   --time_partitioning_field timestamp \

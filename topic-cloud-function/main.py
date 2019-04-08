@@ -36,9 +36,24 @@ def map_aircraft_to_record(aircrafts, message_now, device_id):
   Returns `(unique_ids, records)`
   """
   def copy_data(aircraft):
-    result = aircraft.copy()
-    result['device_id'] = device_id
-    result['timestamp'] = datetime.utcfromtimestamp(float(message_now)).isoformat()
+    result = {
+      'hex': aircraft.get('hex'),
+      'squawk': aircraft.get('squawk'),
+      'flight': aircraft.get('flight'),
+      'lat': aircraft.get('lat'), 
+      'lon': aircraft.get('lon'), 
+      'nucp': aircraft.get('nucp'), 
+      'seen_pos': aircraft.get('seen_pos'), 
+      'altitude': aircraft.get('altitude'),
+      'vert_rate': aircraft.get('vert_rate'),
+      'track': aircraft.get('track'),
+      'speed': aircraft.get('speed'),
+      'messages': aircraft.get('messages'),
+      'seen': aircraft.get('seen'),
+      'rssi': aircraft.get('rssi'),
+      'device_id': device_id,
+      'timestamp': datetime.utcfromtimestamp(float(message_now)).isoformat()
+    }
 
     result_json = json.dumps(result)
     result_hash = hashlib.sha512(result_json.encode('utf-8')).hexdigest()
@@ -90,10 +105,10 @@ def process_reporter(data_inserter):
   """
   total_inserted, errors = data_inserter()
   print(f'INFO: Total inserted records: {total_inserted}')
-  if error_data:
+  if errors:
     for (record, err) in errors:
       record_json = json.dumps(record) if record else 'NotFound'
-      joined_errors = ','.join(err)
+      joined_errors = json.dumps(err)
       print(f'ERROR: Error inserting {record_json}, Errors : {joined_errors}')
 
 

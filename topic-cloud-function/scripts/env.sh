@@ -12,10 +12,10 @@ export TEST_RUNNER_ACCOUNT=test-runner
 
 export GOOGLE_APPLICATION_CREDENTIALS=~/GCP_${PROJECT_ID}_${TEST_RUNNER_ACCOUNT}.json
 
-export INPUT_TOPIC=adbs
+export INPUT_TOPIC=aircraft-json
 
 export DATASET_ID=aircraft_data
 
-export TABLE_ID=adbs_messages
+export TABLE_ID=aircraft_json
 
-export TEST_TABLE_ID=adbs_messages_test
+export TEST_TABLE_ID=aircraft_json_test
