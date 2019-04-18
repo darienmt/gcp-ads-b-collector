@@ -17,3 +17,7 @@ export DEVICE_ID=local-receiver
 export OUTPUT_BUCKET=${PROJECT_ID}-aircraft-json
 
 export SAMPLING_PERIOD_SECONDS=5
+
+export IMAGE_NAME=aircraft-json-to-bucket
+
+export IMAGE_TAG=1.0.0
