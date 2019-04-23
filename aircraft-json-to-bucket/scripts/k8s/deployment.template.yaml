@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aircraft-to-bucket-deployment
+  labels:
+    app: aircraft-to-bucket
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aircraft-to-bucket
+  template:
+    metadata:
+      labels:
+        app: aircraft-to-bucket
+    spec:
+      containers:
+      - name: aircraft-to-bucket
+        image: gcr.io/${PROJECT_ID}/${IMAGE_NAME}:${IMAGE_TAG}
+        env:
+        - name: DEVICE_ID
+          value: "k8s-receiver"
+        - name: OUTPUT_BUCKET
+          value: "${OUTPUT_BUCKET}"
+        - name: SAMPLING_PERIOD_SECONDS
+          value: "${SAMPLING_PERIOD_SECONDS}"
+        - name: RECEIVER_URL
+          value: "${RECEIVER_URL}"

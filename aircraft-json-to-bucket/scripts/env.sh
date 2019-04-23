@@ -21,3 +21,7 @@ export SAMPLING_PERIOD_SECONDS=5
 export IMAGE_NAME=aircraft-json-to-bucket
 
 export IMAGE_TAG=1.0.0
+
+export K8S_NAMESPACE=aircraft-to-bucket
+
+export K8S_GCP_SERVICE_ACCOUNT=k8s-gcr-auth
