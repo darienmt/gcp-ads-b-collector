@@ -186,7 +186,12 @@ function fetchData() {
 }
 
 var PositionHistorySize = 0;
-function initialize() {
+function initializeApp() {
+        firebase.initializeApp(firebaseConfig);
+        initialize();
+}
+function initialize() {       
+        
         // Set page basics
         document.title = PageName;
 
@@ -740,7 +745,7 @@ function initialize_map() {
         // NB: altitudes are in _meters_, you can specify a list of altitudes
 
         // kick off an ajax request that will add the rings when it's done
-        var request = $.ajax({ url: 'upintheair.json',
+        var request = $.ajax({ url: '/data/upintheair.json',
                                timeout: 5000,
                                cache: true,
                                dataType: 'json' });
@@ -1878,8 +1883,13 @@ function toggleLayer(element, layer) {
 
 // check status.json if it has a serial number for a flightfeeder
 function flightFeederCheck() {
+        // var addMessage = firebase.functions().httpsCallable('addMessage');
+        // addMessage({text: ''}).then(function(result) {
+        //   console.log(result);
+        // });
 	$.ajax('/data/status.json', {
 		success: function(data) {
+                        console.log(data)
 			if (data.type === "flightfeeder") {
 				isFlightFeeder = true;
 				updatePiAwareOrFlightFeeder();

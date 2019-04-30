@@ -23,13 +23,16 @@
 		<script type="text/javascript" src="flags.js"></script>
 		<script type="text/javascript" src="layers.js"></script>
 		<script type="text/javascript" src="script.js?v=2"></script>
-
+		
 		<script defer src="/__/firebase/5.10.1/firebase-app.js"></script>
+    <script defer src="/__/firebase/5.10.1/firebase-auth.js"></script>
+		<script defer src="/__/firebase/5.10.1/firebase-functions.js"></script>
+    <!-- <script defer src="/__/firebase/init.js"></script> -->
 		<script defer src="firebase-config.js"></script>
 		<title>PiAware Skyview</title>
 	</head>
 
-	<body onload="initialize()">
+	<body onload="initializeApp()">
 		<div id="loader" class="hidden">
 			<img src="spinny.gif" id="spinny" alt="Loading...">
 			<progress id="loader_progress"></progress>
