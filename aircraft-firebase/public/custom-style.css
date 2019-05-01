@@ -1,0 +1,7 @@
+div.login {
+  text-align: center;
+}
+div.login-error {
+  color: red;
+  padding: 10px;
+}

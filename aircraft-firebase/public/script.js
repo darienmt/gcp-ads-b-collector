@@ -140,58 +140,116 @@ function fetchData() {
                 return;
         }
 
-	FetchPending = $.ajax({ url: 'data/aircraft.json',
+        firebase.auth().currentUser.getIdToken().then(function(token) {
+                FetchPending = $.ajax({ url: 'data/aircraft.json',
                                 timeout: 5000,
                                 cache: false,
-                                dataType: 'json' });
-        FetchPending.done(function(data) {
-                var now = data.now;
+                                dataType: 'json',
+                                beforeSend: function(xhr){xhr.setRequestHeader('Authorization', 'Bearer ' + token);}
+                                });
+                FetchPending.done(function(data) {
+                        var now = data.now;
 
-                processReceiverUpdate(data);
+                        processReceiverUpdate(data);
 
-                // update timestamps, visibility, history track for all planes - not only those updated
-                for (var i = 0; i < PlanesOrdered.length; ++i) {
-                        var plane = PlanesOrdered[i];
-                        plane.updateTick(now, LastReceiverTimestamp);
-                }
-                
-		selectNewPlanes();
-		refreshTableInfo();
-		refreshSelected();
-		refreshHighlighted();
-                
-                if (ReceiverClock) {
-                        var rcv = new Date(now * 1000);
-                        ReceiverClock.render(rcv.getUTCHours(),rcv.getUTCMinutes(),rcv.getUTCSeconds());
-                }
-
-                // Check for stale receiver data
-                if (LastReceiverTimestamp === now) {
-                        StaleReceiverCount++;
-                        if (StaleReceiverCount > 5) {
-                                $("#update_error_detail").text("The data from dump1090 hasn't been updated in a while. Maybe dump1090 is no longer running?");
-                                $("#update_error").css('display','block');
+                        // update timestamps, visibility, history track for all planes - not only those updated
+                        for (var i = 0; i < PlanesOrdered.length; ++i) {
+                                var plane = PlanesOrdered[i];
+                                plane.updateTick(now, LastReceiverTimestamp);
                         }
-                } else { 
-                        StaleReceiverCount = 0;
-                        LastReceiverTimestamp = now;
-                        $("#update_error").css('display','none');
-                }
-	});
+                        
+                        selectNewPlanes();
+                        refreshTableInfo();
+                        refreshSelected();
+                        refreshHighlighted();
+                        
+                        if (ReceiverClock) {
+                                var rcv = new Date(now * 1000);
+                                ReceiverClock.render(rcv.getUTCHours(),rcv.getUTCMinutes(),rcv.getUTCSeconds());
+                        }
 
-        FetchPending.fail(function(jqxhr, status, error) {
-                $("#update_error_detail").text("AJAX call failed (" + status + (error ? (": " + error) : "") + "). Maybe dump1090 is no longer running?");
-                $("#update_error").css('display','block');
+                        // Check for stale receiver data
+                        if (LastReceiverTimestamp === now) {
+                                StaleReceiverCount++;
+                                if (StaleReceiverCount > 5) {
+                                        $("#update_error_detail").text("The data from dump1090 hasn't been updated in a while. Maybe dump1090 is no longer running?");
+                                        $("#update_error").css('display','block');
+                                }
+                        } else { 
+                                StaleReceiverCount = 0;
+                                LastReceiverTimestamp = now;
+                                $("#update_error").css('display','none');
+                        }
+                });
+
+                FetchPending.fail(function(jqxhr, status, error) {
+                        $("#update_error_detail").text("AJAX call failed (" + status + (error ? (": " + error) : "") + "). Maybe dump1090 is no longer running?");
+                        $("#update_error").css('display','block');
+                });
         });
+	
 }
 
 var PositionHistorySize = 0;
 function initializeApp() {
         firebase.initializeApp(firebaseConfig);
-        initialize();
+        firebase.auth().onAuthStateChanged(function(user) {
+          window.user = user; // user is undefined if no user signed in
+          if ( user != undefined ) {
+            $(".login").addClass("hidden");
+            $('#header').show();
+            $('#layout_container').show();
+            initialize();
+          } else {
+            $(".login-error").addClass("hidden");
+            $(".login").removeClass("hidden");
+            $('#header').hide();
+            $('#layout_container').hide();
+            if ( timerFetchData != null ) {
+                clearInterval(timerFetchData);
+            }
+            if ( timerLayers != null ) {
+                clearInterval(timerLayers);
+            }
+            if ( timerReaper != null ) {
+                clearInterval(timerReaper);
+            }
+          }
+        });        
+}
+function reportLoginError(error) {
+        $(".login-error").html(error);
+        $(".login-error").removeClass("hidden");
+}
+function doLogin() {
+        $(".login-error").addClass("hidden");
+        var email = $("#email").val();
+        if ( email == "" ) {
+          reportLoginError("Please inform the email address")
+          return;
+        }
+        var password = $("#password").val();
+        if ( password == "" ) {
+          reportLoginError("Please inform the password address")
+          return;
+        }
+        firebase.auth().signInWithEmailAndPassword(email, password)
+          .catch(function(err) {
+            reportLoginError( "Login error : " + err );
+          });        
+}
+function doLogOut() {
+        firebase.auth().signOut()
+        .catch(function (err) {
+           $(".login").removeClass("hidden");
+           reportLoginError( "Login error : " + err );
+        });
 }
 function initialize() {       
         
+        PositionHistoryBuffer = [];
+        PositionHistorySize = 0;
+        HistoryItemsReturned = 0;
         // Set page basics
         document.title = PageName;
 
@@ -358,10 +416,13 @@ function initialize() {
 
         // Get receiver metadata, reconfigure using it, then continue
         // with initialization
-        $.ajax({ url: 'data/receiver.json',
+        firebase.auth().currentUser.getIdToken().then(function(token) {
+                $.ajax({ url: 'data/receiver.json',
                  timeout: 5000,
                  cache: false,
-                 dataType: 'json' })
+                 dataType: 'json', 
+                 beforeSend: function(xhr){xhr.setRequestHeader('Authorization', 'Bearer ' + token);}
+                })
 
                 .done(function(data) {
                         if (typeof data.lat !== "undefined") {
@@ -381,6 +442,8 @@ function initialize() {
                         initialize_map();
                         start_load_history();
                 });
+        });
+        
 }
 
 var CurrentHistoryFetch = null;
@@ -401,12 +464,15 @@ function load_history_item(i) {
         console.log("Loading history #" + i);
         $("#loader_progress").attr('value',i);
 
-        $.ajax({ url: 'data/history_' + i + '.json',
+        firebase.auth().currentUser.getIdToken().then(function(token) {
+                $.ajax({ url: 'data/history_' + i + '.json',
                  timeout: 5000,
                  cache: false,
-                 dataType: 'json' })
+                 dataType: 'json',
+                 beforeSend: function(xhr){xhr.setRequestHeader('Authorization', 'Bearer ' + token);}
+                })
 
-                .done(function(data) {
+                .done(function(data) {  
 					PositionHistoryBuffer.push(data);
 					HistoryItemsReturned++;
 					$("#loader_progress").attr('value',HistoryItemsReturned);
@@ -422,7 +488,13 @@ function load_history_item(i) {
 						end_load_history();
 					}
                 });
+        });
+        
 }
+
+var timerFetchData = null;
+var timerReaper = null;
+var timerLayers = null;
 
 function end_load_history() {
         $("#loader").addClass("hidden");
@@ -472,8 +544,9 @@ function end_load_history() {
         reaper();
 
         // Setup our timer to poll from the server.
-        window.setInterval(fetchData, RefreshInterval);
-        window.setInterval(reaper, 60000);
+        timerFetchData = window.setInterval(fetchData, RefreshInterval);
+        
+        timerReaper = window.setInterval(reaper, 60000);
 
         // And kick off one refresh immediately.
         fetchData();
@@ -745,39 +818,44 @@ function initialize_map() {
         // NB: altitudes are in _meters_, you can specify a list of altitudes
 
         // kick off an ajax request that will add the rings when it's done
-        var request = $.ajax({ url: '/data/upintheair.json',
+        firebase.auth().currentUser.getIdToken().then(function(token) {
+                var request = $.ajax({ url: '/data/upintheair.json',
                                timeout: 5000,
                                cache: true,
-                               dataType: 'json' });
-        request.done(function(data) {
-                var ringStyle = new ol.style.Style({
-                        fill: null,
-                        stroke: new ol.style.Stroke({
-                                color: '#000000',
-                                width: 1
-                        })
+                               dataType: 'json',
+                               beforeSend: function(xhr){xhr.setRequestHeader('Authorization', 'Bearer ' + token);}
+                         });
+                request.done(function(data) {
+                        var ringStyle = new ol.style.Style({
+                                fill: null,
+                                stroke: new ol.style.Stroke({
+                                        color: '#000000',
+                                        width: 1
+                                })
+                        });
+
+                        for (var i = 0; i < data.rings.length; ++i) {
+                                var geom = new ol.geom.LineString();
+                                var points = data.rings[i].points;
+                                if (points.length > 0) {
+                                        for (var j = 0; j < points.length; ++j) {
+                                                geom.appendCoordinate([ points[j][1], points[j][0] ]);
+                                        }
+                                        geom.appendCoordinate([ points[0][1], points[0][0] ]);
+                                        geom.transform('EPSG:4326', 'EPSG:3857');
+
+                                        var feature = new ol.Feature(geom);
+                                        feature.setStyle(ringStyle);
+                                        StaticFeatures.push(feature);
+                                }
+                        }
                 });
 
-                for (var i = 0; i < data.rings.length; ++i) {
-                        var geom = new ol.geom.LineString();
-                        var points = data.rings[i].points;
-                        if (points.length > 0) {
-                                for (var j = 0; j < points.length; ++j) {
-                                        geom.appendCoordinate([ points[j][1], points[j][0] ]);
-                                }
-                                geom.appendCoordinate([ points[0][1], points[0][0] ]);
-                                geom.transform('EPSG:4326', 'EPSG:3857');
-
-                                var feature = new ol.Feature(geom);
-                                feature.setStyle(ringStyle);
-                                StaticFeatures.push(feature);
-                        }
-                }
+                request.fail(function(jqxhr, status, error) {
+                        // no rings available, do nothing
+                });
         });
-
-        request.fail(function(jqxhr, status, error) {
-                // no rings available, do nothing
-        });
+        
 }
 
 function createSiteCircleFeatures() {
@@ -1883,19 +1961,17 @@ function toggleLayer(element, layer) {
 
 // check status.json if it has a serial number for a flightfeeder
 function flightFeederCheck() {
-        // var addMessage = firebase.functions().httpsCallable('addMessage');
-        // addMessage({text: ''}).then(function(result) {
-        //   console.log(result);
-        // });
-	$.ajax('/data/status.json', {
-		success: function(data) {
-                        console.log(data)
-			if (data.type === "flightfeeder") {
-				isFlightFeeder = true;
-				updatePiAwareOrFlightFeeder();
-			}
-		}
-	})
+        firebase.auth().currentUser.getIdToken().then(function(token) {
+                $.ajax('/data/status.json', {
+                        success: function(data) {
+                                if (data.type === "flightfeeder") {
+                                        isFlightFeeder = true;
+                                        updatePiAwareOrFlightFeeder();
+                                }
+                        },
+                        beforeSend: function(xhr){xhr.setRequestHeader('Authorization', 'Bearer ' + token);}
+                })
+        });	
 }
 
 // updates the page to replace piaware with flightfeeder references

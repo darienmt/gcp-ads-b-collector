@@ -81,7 +81,7 @@ function createBaseLayers() {
         };
 
         refreshNexrad();
-        window.setInterval(refreshNexrad, 5 * 60000);
+        timerLayers = window.setInterval(refreshNexrad, 5 * 60000);
 
         if (world.length > 0) {
                 layers.push(new ol.layer.Group({
