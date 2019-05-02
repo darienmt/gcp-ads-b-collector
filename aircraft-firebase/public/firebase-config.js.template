@@ -1,0 +1,8 @@
+var firebaseConfig = {
+  apiKey: "<API_KEY>",
+  authDomain: "<GCP_PROJECT>.firebaseapp.com",
+  databaseURL: "https://<GCP_PROJECT>.firebaseio.com",
+  projectId: "<GCP_PROJECT>",
+  storageBucket: "<GCP_PROJECT>.appspot.com",
+  messagingSenderId: "<MESSAGING_SENDER_ID>"
+};

@@ -66,3 +66,4 @@ node_modules/
 
 .firebaserc
 public/firebase-config.js
+functions/.runtimeconfig.json

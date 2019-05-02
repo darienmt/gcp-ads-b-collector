@@ -3,6 +3,8 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp();
+const config = functions.config();
+
 const express = require('express');
 const cookieParser = require('cookie-parser')();
 const cors = require('cors')({origin: true});
@@ -42,7 +44,6 @@ const validateFirebaseIdToken = async (req, res, next) => {
 
   try {
     const decodedIdToken = await admin.auth().verifyIdToken(idToken);
-    console.log('ID Token correctly decoded', decodedIdToken);
     req.user = decodedIdToken;
     next();
     return;
@@ -70,25 +71,29 @@ app.get('/data/upintheair.json', (req, res) => {
 app.get('/data/receiver.json', (req, res) => {
   res.send(
     { 
-      "version" : "v3.1.0", 
-      "refresh" : 5000, 
-      "history" : 120, 
-      "lat" : 0, 
-      "lon" : 0 
+      "version" : config.receiver.version, 
+      "refresh" : parseInt(config.receiver.refresh), 
+      "history" : parseInt(config.receiver.history), 
+      "lat" : parseFloat(config.receiver.lat), 
+      "lon" : parseFloat(config.receiver.lon) 
     }
   )
 });
 
-app.get('/data/aircraft.json', (req, res) => {
+
+app.get('/data/history_:number.json', (req, res) => {
   res.send({
     now : new Date() / 1000,
     aircraft : []
   })
 });
 
-app.get('/data/history_:number.json', (req, res) => {
+
+app.get('/data/aircraft.json', (req, res) => {
+  let now = new Date() / 1000;
+  console.log( 'Now : ' + now)
   res.send({
-    now : new Date() / 1000,
+    now : now,
     aircraft : []
   })
 });
