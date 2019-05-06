@@ -10,6 +10,8 @@ const cookieParser = require('cookie-parser')();
 const cors = require('cors')({origin: true});
 const app = express();
 
+const {Storage} = require('@google-cloud/storage');
+
 // Express middleware that validates Firebase ID Tokens passed in the Authorization HTTP header.
 // The Firebase ID token needs to be passed as a Bearer token in the Authorization HTTP header like this:
 // `Authorization: Bearer <Firebase ID Token>`.
@@ -81,21 +83,50 @@ app.get('/data/receiver.json', (req, res) => {
 });
 
 
-app.get('/data/history_:number.json', (req, res) => {
-  res.send({
-    now : new Date() / 1000,
-    aircraft : []
-  })
+app.get('/data/history_:number.json', async (req, res) => {
+  let now = new Date();
+  let backNow = now - ( 120 - req.params.number )*30000;
+  res.send( await getAircraft(backNow));
 });
 
+const storage = new Storage();
 
-app.get('/data/aircraft.json', (req, res) => {
-  let now = new Date() / 1000;
-  console.log( 'Now : ' + now)
-  res.send({
-    now : now,
-    aircraft : []
-  })
+const readJson = (file) => {
+  return new Promise( (resolve, reject) => {
+    let buffer = '';
+    let stream = file.createReadStream();
+    stream.on('data', d => { buffer += d; });
+    stream.on('error', err => { reject(err); } );
+    stream.on('end', () => {
+      resolve(buffer);
+    })
+  });
+}
+
+const getAircraft = async (now) => {
+  const delay = 2*parseInt(config.receiver.refresh);
+  const passNow = (now - delay) / 1000
+  const time = passNow/10;
+  const prefix = config.bucket.device_id + '/' + (time.toString()).split('.')[0];
+  const options = {
+    prefix: prefix,
+    delimiter: '/'
+  }
+  const [files] = await storage.bucket(config.bucket.url).getFiles(options)
+  let data = null
+  if ( files.length > 0 ) {
+    data = JSON.parse( await readJson(files[0]) );
+  } else {
+    data = {
+      now: passNow,
+      aircraft: []
+    }
+  }
+  return data;
+}
+
+app.get('/data/aircraft.json', async (req, res) => {
+  res.send(await getAircraft(new Date()));
 });
 
 // This HTTPS endpoint can only be accessed by your Firebase Users.
