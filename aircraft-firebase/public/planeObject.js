@@ -494,8 +494,10 @@ PlaneObject.prototype.updateData = function(receiver_timestamp, data) {
                 this.altitude = data.alt_baro;
         } else if ('alt_geom' in data) {
                 this.altitude = data.alt_geom;
+        } else if ('altitude' in data) {
+                this.altitude = data.altitude;
         } else {
-                this.altitude = null;
+                this.altitude = null
         }
 
         // Pick vertical rate from either baro or geom rate
@@ -515,6 +517,8 @@ PlaneObject.prototype.updateData = function(receiver_timestamp, data) {
                 this.speed = data.tas;
         } else if ('ias' in data) {
                 this.speed = data.ias;
+        } else if ('speed' in data) {
+                this.speed = data.speed;
         } else {
                 this.speed = null;
         }
